@@ -21,12 +21,13 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/petclinic")
-public class PetClinicController {
+public class PetClinicController<T> {
 
 	private static final Logger logger = LoggerFactory.getLogger(PetClinicController.class);
 
 	@GetMapping("/hello")
 	public String hello() {
+		logger.info("This is an INFO level message.");
 		return "Hello, Pet Clinic!";
 	}
 
@@ -37,12 +38,12 @@ public class PetClinicController {
 
 	// Set Implementation
 
-	private Map<String, Set<Object>> setMap = new HashMap<>();
+	private Map<String, Set<T>> setMap = new HashMap<>();
 
 	@PostMapping("/{setName}/addElement")
-	public ResponseEntity<String> addElement(@PathVariable String setName, @RequestBody SetElementRequest request) {
-		Set<Object> set = setMap.computeIfAbsent(setName, k -> new HashSet<>());
-		Object elementToAdd = request.getElement();
+	public ResponseEntity<String> addElement(@PathVariable String setName, @RequestBody SetElementRequest<T> request) {
+		Set<T> set = setMap.computeIfAbsent(setName, k -> new HashSet<>());
+		T elementToAdd = request.getElement();
 		if (set.add(elementToAdd)) {
 			return new ResponseEntity<>("Element added to the set '" + setName + "' successfully.", HttpStatus.OK);
 		}
@@ -52,13 +53,14 @@ public class PetClinicController {
 	}
 
 	@DeleteMapping("/{setName}/removeElement")
-	public ResponseEntity<String> removeElement(@PathVariable String setName, @RequestBody SetElementRequest request) {
-		Set<Object> set = setMap.get(setName);
+	public ResponseEntity<String> removeElement(@PathVariable String setName,
+			@RequestBody SetElementRequest<T> request) {
+		Set<T> set = setMap.get(setName);
 		if (set == null) {
 			return new ResponseEntity<>("Set '" + setName + "' not found.", HttpStatus.NOT_FOUND);
 		}
 
-		Object elementToRemove = request.getElement();
+		T elementToRemove = request.getElement();
 		if (set.remove(elementToRemove)) {
 			return new ResponseEntity<>("Element removed from the set '" + setName + "' successfully.", HttpStatus.OK);
 		}
@@ -68,13 +70,14 @@ public class PetClinicController {
 	}
 
 	@GetMapping("/{setName}/checkElement")
-	public ResponseEntity<String> checkElement(@PathVariable String setName, @RequestBody SetElementRequest request) {
-		Set<Object> set = setMap.get(setName);
+	public ResponseEntity<String> checkElement(@PathVariable String setName,
+			@RequestBody SetElementRequest<T> request) {
+		Set<T> set = setMap.get(setName);
 		if (set == null) {
 			return new ResponseEntity<>("Set '" + setName + "' not found.", HttpStatus.NOT_FOUND);
 		}
 
-		Object elementToCheck = request.getElement();
+		T elementToCheck = request.getElement();
 		if (set.contains(elementToCheck)) {
 			return new ResponseEntity<>("Element exists in the set '" + setName + "'.", HttpStatus.OK);
 		}
@@ -84,8 +87,8 @@ public class PetClinicController {
 	}
 
 	@GetMapping("/{setName}/getAllElements")
-	public ResponseEntity<Set<Object>> getAllElements(@PathVariable String setName) {
-		Set<Object> set = setMap.get(setName);
+	public ResponseEntity<Set<T>> getAllElements(@PathVariable String setName) {
+		Set<T> set = setMap.get(setName);
 		if (set != null) {
 			return new ResponseEntity<>(set, HttpStatus.OK);
 		}
@@ -96,7 +99,7 @@ public class PetClinicController {
 
 	@DeleteMapping("/{setName}/clearSet")
 	public ResponseEntity<String> clearSet(@PathVariable String setName) {
-		Set<Object> set = setMap.get(setName);
+		Set<T> set = setMap.get(setName);
 		if (set != null) {
 			set.clear();
 			return new ResponseEntity<>("Set '" + setName + "' cleared successfully.", HttpStatus.OK);
@@ -107,7 +110,7 @@ public class PetClinicController {
 	}
 
 	@GetMapping("/getAllSets")
-	public ResponseEntity<Map<String, Set<Object>>> getAllSets() {
+	public ResponseEntity<Map<String, Set<T>>> getAllSets() {
 		if (!setMap.isEmpty()) {
 			return new ResponseEntity<>(setMap, HttpStatus.OK);
 		}
